@@ -1320,6 +1320,32 @@ function setupDatePickerConstraints() {
     appState.selectedDate = e.target.value;
     updateBookingSummary();
   });
+
+  // Abre o calendário nativo ao clicar em qualquer parte do campo
+  const triggerCalendar = () => {
+    try {
+      if (typeof dateInput.showPicker === 'function') {
+        dateInput.showPicker();
+      }
+    } catch (err) {
+      // Fallback para navegadores legados
+    }
+  };
+
+  dateInput.addEventListener('click', triggerCalendar);
+
+  // Permite clicar também no rótulo do campo para abrir o calendário
+  const dateWrapper = dateInput.closest('.date-picker-group');
+  if (dateWrapper) {
+    const label = dateWrapper.querySelector('label');
+    if (label) {
+      label.style.cursor = 'pointer';
+      label.addEventListener('click', () => {
+        dateInput.focus();
+        triggerCalendar();
+      });
+    }
+  }
 }
 
 function setupPhoneMask() {

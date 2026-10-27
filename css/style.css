@@ -1100,6 +1100,7 @@ img {
   left: 16px;
   transform: translateY(-50%);
   color: var(--gold);
+  pointer-events: none;
 }
 
 .form-control {
@@ -1112,6 +1113,28 @@ img {
   font-family: var(--font-sans);
   font-size: 0.95rem;
   transition: var(--transition);
+}
+
+input[type="date"].form-control {
+  cursor: pointer;
+  position: relative;
+}
+
+/* Indicador e ícone do calendário para tema escuro */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.85) sepia(100%) saturate(350%) hue-rotate(5deg);
+  opacity: 0.9;
+  font-size: 1.15rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  filter: invert(1) brightness(1.2);
+  transform: scale(1.15);
 }
 
 .form-control:focus {
