@@ -35,6 +35,10 @@
           <span>Meus Horários</span>
           <span class="badge" id="appointmentsCount">0</span>
         </button>
+        <button class="btn-admin-agenda" id="openAgendaManagerBtn" title="Alterar Agenda (Acesso Restrito)">
+          <i class="fa-solid fa-lock"></i>
+          <span>Alterar Agenda</span>
+        </button>
         <a href="#agendamento" class="btn btn-primary nav-btn-desktop">
           <i class="fa-solid fa-calendar-day"></i> Agendar
         </a>
@@ -560,6 +564,95 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" id="btnCloseMyAppointments">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Autenticação Restrita para Alterar Agenda -->
+  <div class="modal-backdrop" id="agendaLoginModal">
+    <div class="modal-card modal-card-sm">
+      <button class="modal-close" id="closeAgendaLoginBtn">&times;</button>
+      <div class="modal-header text-center">
+        <div class="agenda-lock-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3>Alterar Agenda</h3>
+        <p>Acesso restrito. Somente com o login e senha autorizados é possível modificar horários e a agenda.</p>
+      </div>
+      <form id="agendaLoginForm" class="modal-form">
+        <div class="form-group">
+          <label for="agendaUserInput" class="form-label">Login de Acesso *</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input type="text" id="agendaUserInput" class="form-control" placeholder="Digite o login" required autocomplete="username">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="agendaPassInput" class="form-label">Senha *</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-key input-icon"></i>
+            <input type="password" id="agendaPassInput" class="form-control" placeholder="Digite a senha" required autocomplete="current-password">
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-unlock-keyhole"></i> Entrar e Alterar Agenda
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Painel de Alteração da Agenda (Liberado apenas com login WALBABER) -->
+  <div class="modal-backdrop" id="agendaManagerModal">
+    <div class="modal-card modal-card-lg">
+      <button class="modal-close" id="closeAgendaManagerBtn">&times;</button>
+      <div class="agenda-manager-header flex-between">
+        <div>
+          <span class="agenda-badge"><i class="fa-solid fa-circle-check"></i> SESSÃO ATIVA: WALBABER</span>
+          <h2>Gerenciar & Alterar Agenda</h2>
+          <p>Adicione ou remova horários disponíveis e acompanhe agendamentos marcados.</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger" id="btnAgendaLogout">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Bloquear / Sair
+        </button>
+      </div>
+
+      <div class="agenda-sections">
+        <!-- 1. Gestão de Horários da Agenda -->
+        <div class="agenda-section-card">
+          <div class="flex-between" style="margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <h3><i class="fa-solid fa-clock gold-text"></i> Horários Disponíveis para os Clientes</h3>
+            <button type="button" class="btn btn-sm btn-outline" id="btnResetDefaultSlots">
+              <i class="fa-solid fa-rotate-left"></i> Restaurar Horários Padrão
+            </button>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+            Qualquer horário adicionado ou excluído aqui reflete imediatamente para os clientes que estiverem agendando.
+          </p>
+
+          <form id="formAddAgendaSlot" class="agenda-add-slot-form">
+            <input type="time" id="newSlotInput" class="form-control" required style="max-width: 170px;">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-plus"></i> Adicionar Horário
+            </button>
+          </form>
+
+          <div class="agenda-slots-grid" id="agendaManagerSlotsContainer">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- 2. Controle dos Agendamentos Marcados -->
+        <div class="agenda-section-card" style="margin-top: 24px;">
+          <div class="flex-between" style="margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <h3><i class="fa-solid fa-calendar-check gold-text"></i> Agendamentos Marcados</h3>
+            <span class="gold-text" style="font-weight: 700; font-size: 0.9rem;" id="agendaTotalBookingsCount">0 cliente(s)</span>
+          </div>
+          <div class="agenda-bookings-table-wrapper" id="agendaManagerBookingsContainer">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
       </div>
     </div>
   </div>

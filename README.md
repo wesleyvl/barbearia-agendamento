@@ -1,22 +1,34 @@
-# 💈 Barbearia WALBABER - Sistema de Agendamento Online
+# 💈 Barbearia WALBABER - Sistema de Agendamento Online & Gestão de Agenda
 
-Um site moderno, elegante e responsivo de barbearia com **sistema integrado de agendamento online**, catálogo de serviços, escolha de profissionais, cálculo de preços em tempo real, seleção de data/horário e confirmação direta pelo WhatsApp.
+Um site moderno, elegante e responsivo de barbearia com **sistema integrado de agendamento online para clientes** e **área de controle restrito para alterar a agenda protegido por login e senha**.
 
 ---
 
-## ✂️ Funcionalidades do Site
+## 🔒 Acesso Restrito para Alterar a Agenda
 
-- 📅 **Assistente de Agendamento em 4 Etapas:**
-  - **Passo 1:** Seleção de um ou múltiplos serviços (corte degrade, barboterapia com toalha quente, combos, platinado, etc.).
-  - **Passo 2:** Escolha do barbeiro preferido com foto, especialidade e avaliação, ou "Primeiro Disponível".
-  - **Passo 3:** Escolha da data (bloqueia datas passadas e abre o calendário nativo com 1 clique) e seleção de horários em botões interativos.
-  - **Passo 4:** Cadastro rápido com nome e WhatsApp (máscara automática `(XX) XXXXX-XXXX`).
-- 💵 **Resumo Dinâmico em Tempo Real:** Conforme os serviços são selecionados, o valor total e o tempo estimado são somados automaticamente.
-- 🎟️ **Comprovante Digital (Ticket):** Exibe um bilhete com número de protocolo (`#AGD-XXXXXX`) após a conclusão do agendamento.
-- 📱 **Integração com WhatsApp:** Botão que formata a mensagem com todos os detalhes da reserva e envia diretamente para o WhatsApp da barbearia (`5522992653627`).
-- 💾 **Meus Horários (LocalStorage):** O cliente pode consultar ou cancelar suas reservas anteriores salvas no próprio dispositivo.
-- 📍 **Endereço e Mapa Integrados:** Rua Recife, 1071, Casa 4 - Rio das Ostras - RJ, com mapa interativo do Google Maps.
-- 🎨 **Design Barber Premium:** Tema Dark com detalhes em dourado, tipografia elegante e 100% responsivo para celulares e computadores.
+Para alterar horários disponíveis e gerenciar as reservas dos clientes, clique no botão **`[🔒 Alterar Agenda]`** no topo da página:
+
+* **Login de Acesso:** `WALBABER`
+* **Senha:** `123456`
+
+> **Regra de Segurança:** Somente informando este login e senha exatos é possível desbloquear o painel para:
+> 1. **Adicionar novos horários** à grade de atendimento.
+> 2. **Excluir horários** indisponíveis.
+> 3. **Restaurar horários padrão**.
+> 4. **Visualizar todos os agendamentos marcados**, alterar status (*Confirmado, Concluído, Cancelado*) e chamar o cliente no WhatsApp com 1 clique.
+> 5. **Bloquear / Sair da sessão** a qualquer momento.
+
+---
+
+## 👤 Área Pública para Clientes
+
+Os clientes finais acessam o site sem precisar de senha e podem:
+- Visualizar os serviços, preços, fotos e a equipe de barbeiros.
+- Agendar horários através do assistente em 4 passos.
+- Selecionar a data com **abertura do calendário nativo com 1 clique**.
+- Escolher apenas os horários que o administrador deixou liberados na agenda.
+- Receber o comprovante (Ticket) e enviar a confirmação pronta pelo WhatsApp.
+- Consultar ou cancelar suas próprias reservas no botão **"Meus Horários"**.
 
 ---
 
@@ -35,7 +47,7 @@ Um site moderno, elegante e responsivo de barbearia com **sistema integrado de a
 ### Passo 2: Executar no navegador
 1. No VS Code, instale a extensão **Live Server** (`Ctrl + Shift + X` > pesquise por *Live Server*).
 2. Clique com o botão direito no arquivo `index.html` e selecione **"Open with Live Server"**.
-3. O site abrirá automaticamente no seu navegador padrão!
+3. O site abrirá automaticamente no seu navegador!
 
 ---
 

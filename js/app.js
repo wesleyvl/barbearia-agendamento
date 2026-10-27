@@ -1,7 +1,7 @@
 /**
- * WALBABER - SISTEMA DE AGENDAMENTO ONLINE
- * Focado 100% no Usuário Final (Cliente)
- * Design Elegante, Agendamento em 4 Passos e Confirmação via WhatsApp
+ * WALBABER - SISTEMA DE AGENDAMENTO ONLINE & CONTROLE DA AGENDA
+ * Acesso Restrito para Alterar Agenda:
+ * LOGIN: WALBABER | SENHA: 123456
  */
 
 // ========================================================
@@ -125,11 +125,17 @@ const BARBERS_DATA = [
   }
 ];
 
-const TIME_SLOTS = [
+const DEFAULT_TIME_SLOTS = [
   '09:00', '09:45', '10:30', '11:15', '12:00',
   '13:30', '14:15', '15:00', '15:45', '16:30',
   '17:15', '18:00', '18:45', '19:30'
 ];
+
+// Credenciais de Acesso Exclusivo para Alterar a Agenda
+const AGENDA_AUTH = {
+  user: 'WALBABER',
+  pass: '123456'
+};
 
 // Dados da Barbearia
 const STORE_CONFIG = {
@@ -139,7 +145,26 @@ const STORE_CONFIG = {
 };
 
 // ========================================================
-// 2. ESTADO DO AGENDAMENTO (CLIENTE)
+// 2. PERSISTÊNCIA DE HORÁRIOS DA AGENDA
+// ========================================================
+
+function getTimeSlots() {
+  const data = localStorage.getItem('walbaber_agenda_slots');
+  return data ? JSON.parse(data) : DEFAULT_TIME_SLOTS;
+}
+
+function saveTimeSlots(slots) {
+  localStorage.setItem('walbaber_agenda_slots', JSON.stringify(slots));
+  renderTimeSlots();
+  renderAgendaManagerSlots();
+}
+
+function isAgendaAuth() {
+  return sessionStorage.getItem('walbaber_agenda_session') === 'true';
+}
+
+// ========================================================
+// 3. ESTADO DO AGENDAMENTO (CLIENTE)
 // ========================================================
 
 const appState = {
@@ -151,7 +176,7 @@ const appState = {
 };
 
 // ========================================================
-// 3. INICIALIZAÇÃO
+// 4. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -167,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================================
-// 4. RENDERIZAÇÃO NA PÁGINA
+// 5. RENDERIZAÇÃO CLIENTE
 // ========================================================
 
 // Catálogo de Serviços
@@ -269,12 +294,18 @@ function renderBookingBarbers() {
   }).join('');
 }
 
-// Passo 3: Horários Disponíveis
+// Passo 3: Horários Disponíveis para o Cliente (Dinâmicos da Agenda)
 function renderTimeSlots() {
   const container = document.getElementById('timeSlotsContainer');
   if (!container) return;
 
-  container.innerHTML = TIME_SLOTS.map(time => {
+  const slots = getTimeSlots();
+  if (slots.length === 0) {
+    container.innerHTML = `<p style="grid-column: 1/-1; color: var(--text-muted); font-size: 0.9rem;">Nenhum horário disponível no momento.</p>`;
+    return;
+  }
+
+  container.innerHTML = slots.map(time => {
     const isSelected = appState.selectedTime === time;
     return `
       <button type="button" class="time-slot-btn ${isSelected ? 'selected' : ''}" onclick="selectTime('${time}')">
@@ -285,7 +316,7 @@ function renderTimeSlots() {
 }
 
 // ========================================================
-// 5. NAVEGAÇÃO & SELEÇÕES DO WIZARD
+// 6. NAVEGAÇÃO & SELEÇÕES DO WIZARD
 // ========================================================
 
 function goToStep(stepNumber) {
@@ -403,7 +434,7 @@ function selectTime(time) {
 }
 
 // ========================================================
-// 6. FINALIZAR AGENDAMENTO & TICKET
+// 7. FINALIZAR AGENDAMENTO & TICKET
 // ========================================================
 
 function handleClientFormSubmit(e) {
@@ -440,6 +471,7 @@ function handleClientFormSubmit(e) {
   const newAppointment = {
     id: 'AGD-' + Date.now().toString().slice(-6),
     createdAt: new Date().toISOString(),
+    status: 'Confirmado',
     client: { name, phone, notes },
     services: appState.selectedServices.map(s => ({ name: s.name, price: s.price })),
     barber: appState.selectedBarber.name,
@@ -449,13 +481,8 @@ function handleClientFormSubmit(e) {
     totalPrice: totalPrice
   };
 
-  // Salva no armazenamento local do dispositivo
   saveAppointmentToLocalStorage(newAppointment);
-
-  // Exibe o Comprovante (Ticket)
   showTicketModal(newAppointment);
-
-  // Reseta formulário
   resetBookingForm();
 }
 
@@ -464,6 +491,9 @@ function saveAppointmentToLocalStorage(appointment) {
   list.unshift(appointment);
   localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
   updateAppointmentsCountBadge();
+  if (isAgendaAuth()) {
+    renderAgendaManagerBookings();
+  }
 }
 
 function getStoredAppointments() {
@@ -623,15 +653,274 @@ function clientCancelAppointment(id) {
     localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
     updateAppointmentsCountBadge();
     openMyAppointmentsModal();
+    if (isAgendaAuth()) renderAgendaManagerBookings();
     showToast('Agendamento cancelado com sucesso.', 'info');
   }
 }
 
 // ========================================================
-// 7. EVENT LISTENERS E CONTROLES
+// 8. CONTROLE DA AGENDA (EXCLUSIVO: LOGIN WALBABER / SENHA 123456)
+// ========================================================
+
+// Abre Login ou Direto o Painel se já estiver autenticado
+function handleOpenAgendaManagerClick() {
+  if (isAgendaAuth()) {
+    openAgendaManagerModal();
+  } else {
+    openAgendaLoginModal();
+  }
+}
+
+function openAgendaLoginModal() {
+  const modal = document.getElementById('agendaLoginModal');
+  const userInput = document.getElementById('agendaUserInput');
+  const passInput = document.getElementById('agendaPassInput');
+  if (userInput) userInput.value = '';
+  if (passInput) passInput.value = '';
+  if (modal) modal.classList.add('open');
+}
+
+function closeAgendaLoginModal() {
+  const modal = document.getElementById('agendaLoginModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function handleAgendaLoginSubmit(e) {
+  e.preventDefault();
+  const userInput = document.getElementById('agendaUserInput');
+  const passInput = document.getElementById('agendaPassInput');
+
+  const enteredUser = userInput ? userInput.value.trim().toUpperCase() : '';
+  const enteredPass = passInput ? passInput.value.trim() : '';
+
+  // VALIDAÇÃO ESTRITA: LOGIN WALBABER E SENHA 123456
+  if (enteredUser === AGENDA_AUTH.user && enteredPass === AGENDA_AUTH.pass) {
+    sessionStorage.setItem('walbaber_agenda_session', 'true');
+    closeAgendaLoginModal();
+    openAgendaManagerModal();
+    showToast('Acesso autorizado! Você agora pode alterar horários e a agenda.');
+  } else {
+    showToast('Login ou senha incorretos! Somente WALBABER com a senha correta pode alterar a agenda.', 'error');
+  }
+}
+
+function openAgendaManagerModal() {
+  if (!isAgendaAuth()) {
+    openAgendaLoginModal();
+    return;
+  }
+  const modal = document.getElementById('agendaManagerModal');
+  if (!modal) return;
+
+  renderAgendaManagerSlots();
+  renderAgendaManagerBookings();
+  modal.classList.add('open');
+}
+
+function closeAgendaManagerModal() {
+  const modal = document.getElementById('agendaManagerModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function handleAgendaLogout() {
+  sessionStorage.removeItem('walbaber_agenda_session');
+  closeAgendaManagerModal();
+  showToast('Sessão encerrada. A agenda foi bloqueada contra alterações.', 'info');
+}
+
+// Renderiza os chips de horários no painel do administrador
+function renderAgendaManagerSlots() {
+  const container = document.getElementById('agendaManagerSlotsContainer');
+  if (!container) return;
+
+  const slots = getTimeSlots();
+  container.innerHTML = slots.map(time => `
+    <div class="agenda-slot-chip">
+      <i class="fa-regular fa-clock gold-text"></i>
+      <strong>${time}</strong>
+      <button type="button" class="del-slot-btn" onclick="agendaRemoveTimeSlot('${time}')" title="Excluir este horário">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+// Adiciona novo horário (SOMENTE AUTORIZADO)
+function handleAddAgendaSlotSubmit(e) {
+  e.preventDefault();
+  if (!isAgendaAuth()) {
+    showToast('Acesso negado! Faça login como WALBABER para alterar a agenda.', 'error');
+    openAgendaLoginModal();
+    return;
+  }
+
+  const input = document.getElementById('newSlotInput');
+  const time = input ? input.value : '';
+  if (!time) return;
+
+  let slots = getTimeSlots();
+  if (slots.includes(time)) {
+    showToast('Este horário já está cadastrado na agenda!', 'warning');
+    return;
+  }
+
+  slots.push(time);
+  slots.sort((a, b) => a.localeCompare(b));
+  saveTimeSlots(slots);
+
+  input.value = '';
+  showToast(`Horário ${time} adicionado à agenda com sucesso!`);
+}
+
+// Remove horário da agenda (SOMENTE AUTORIZADO)
+function agendaRemoveTimeSlot(time) {
+  if (!isAgendaAuth()) {
+    showToast('Acesso negado! Faça login como WALBABER para alterar a agenda.', 'error');
+    openAgendaLoginModal();
+    return;
+  }
+
+  let slots = getTimeSlots();
+  if (slots.length <= 1) {
+    showToast('Mantenha pelo menos um horário ativo na agenda!', 'warning');
+    return;
+  }
+
+  slots = slots.filter(t => t !== time);
+  saveTimeSlots(slots);
+  showToast(`Horário ${time} removido da agenda.`, 'info');
+}
+
+// Restaura horários padrão (SOMENTE AUTORIZADO)
+function handleResetDefaultAgendaSlots() {
+  if (!isAgendaAuth()) {
+    showToast('Acesso negado! Faça login como WALBABER para alterar a agenda.', 'error');
+    openAgendaLoginModal();
+    return;
+  }
+
+  if (confirm('Deseja restaurar a grade de horários padrão da barbearia?')) {
+    saveTimeSlots([...DEFAULT_TIME_SLOTS]);
+    showToast('Horários padrão restaurados na agenda!');
+  }
+}
+
+// Renderiza a lista de agendamentos dentro do painel
+function renderAgendaManagerBookings() {
+  const container = document.getElementById('agendaManagerBookingsContainer');
+  const countEl = document.getElementById('agendaTotalBookingsCount');
+  if (!container) return;
+
+  const bookings = getStoredAppointments();
+  if (countEl) countEl.textContent = `${bookings.length} agendamento(s)`;
+
+  if (bookings.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 25px; color: var(--text-muted);">
+        <i class="fa-solid fa-calendar-check" style="font-size: 2rem; margin-bottom: 8px; color: var(--gold);"></i>
+        <p>Nenhum cliente agendou horários ainda.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <table class="agenda-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Cliente</th>
+          <th>Serviço(s)</th>
+          <th>Barbeiro</th>
+          <th>Data/Hora</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bookings.map(item => {
+          const [year, month, day] = item.date.split('-');
+          const formattedDate = `${day}/${month}/${year}`;
+          const cleanPhone = item.client.phone.replace(/\D/g, '');
+          const servicesList = item.services.map(s => s.name).join(', ');
+          const waMsg = encodeURIComponent(
+            `Olá ${item.client.name}! Sou da Barbearia WALBABER referente ao seu agendamento (#${item.id}) no dia ${formattedDate} às ${item.time}. Tudo confirmado!`
+          );
+
+          return `
+            <tr>
+              <td><strong class="gold-text">#${item.id}</strong></td>
+              <td>
+                <strong>${item.client.name}</strong><br>
+                <small style="color: var(--text-muted);">${item.client.phone}</small>
+              </td>
+              <td><small>${servicesList}</small></td>
+              <td><strong>${item.barber}</strong></td>
+              <td><strong>${formattedDate}</strong><br><small class="gold-text">${item.time}</small></td>
+              <td><strong>R$ ${item.totalPrice.toFixed(2).replace('.', ',')}</strong></td>
+              <td>
+                <select class="form-control" style="padding: 4px 8px; font-size: 0.8rem; width: auto;" onchange="agendaUpdateBookingStatus('${item.id}', this.value)">
+                  <option value="Confirmado" ${item.status === 'Confirmado' ? 'selected' : ''}>Confirmado</option>
+                  <option value="Concluído" ${item.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+                  <option value="Cancelado" ${item.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                </select>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <a href="https://wa.me/55${cleanPhone}?text=${waMsg}" target="_blank" class="btn-sm-wa" title="Chamar cliente no WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i>
+                  </a>
+                  <button type="button" class="btn-sm-del" onclick="agendaDeleteBooking('${item.id}')" title="Excluir">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function agendaUpdateBookingStatus(id, newStatus) {
+  if (!isAgendaAuth()) {
+    showToast('Acesso negado! Faça login como WALBABER.', 'error');
+    return;
+  }
+  let list = getStoredAppointments();
+  list = list.map(item => {
+    if (item.id === id) {
+      return { ...item, status: newStatus };
+    }
+    return item;
+  });
+  localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
+  showToast(`Status da reserva #${id} atualizado para ${newStatus}!`);
+}
+
+function agendaDeleteBooking(id) {
+  if (!isAgendaAuth()) {
+    showToast('Acesso negado! Faça login como WALBABER.', 'error');
+    return;
+  }
+  if (confirm(`Deseja excluir a reserva #${id} da agenda?`)) {
+    let list = getStoredAppointments();
+    list = list.filter(item => item.id !== id);
+    localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
+    updateAppointmentsCountBadge();
+    renderAgendaManagerBookings();
+    showToast(`Reserva #${id} removida da agenda.`);
+  }
+}
+
+// ========================================================
+// 9. EVENT LISTENERS GERAIS
 // ========================================================
 
 function setupEventListeners() {
+  // Wizard Cliente
   document.getElementById('btnGoToStep2')?.addEventListener('click', () => goToStep(2));
   document.getElementById('btnBackToStep1')?.addEventListener('click', () => goToStep(1));
   document.getElementById('btnGoToStep3')?.addEventListener('click', () => goToStep(3));
@@ -646,6 +935,7 @@ function setupEventListeners() {
     });
   });
 
+  // Filtros de Serviços
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -655,6 +945,7 @@ function setupEventListeners() {
     });
   });
 
+  // Menu Mobile
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
   if (menuToggle && navLinks) {
@@ -679,20 +970,33 @@ function setupEventListeners() {
     });
   }
 
+  // Submissão do Agendamento pelo Cliente
   const bookingForm = document.getElementById('bookingForm');
   if (bookingForm) {
     bookingForm.addEventListener('submit', handleClientFormSubmit);
   }
 
+  // Modais de Agendamento do Cliente
   document.getElementById('closeConfirmationBtn')?.addEventListener('click', closeConfirmationModal);
   document.getElementById('btnFinishTicket')?.addEventListener('click', closeConfirmationModal);
 
   document.getElementById('openMyAppointmentsBtn')?.addEventListener('click', openMyAppointmentsModal);
   document.getElementById('closeMyAppointmentsBtn')?.addEventListener('click', closeMyAppointmentsModal);
   document.getElementById('btnCloseMyAppointments')?.addEventListener('click', closeMyAppointmentsModal);
+
+  // CONTROLE DA AGENDA (RESTRIÇÃO WALBABER / 123456)
+  document.getElementById('openAgendaManagerBtn')?.addEventListener('click', handleOpenAgendaManagerClick);
+  document.getElementById('closeAgendaLoginBtn')?.addEventListener('click', closeAgendaLoginModal);
+  document.getElementById('agendaLoginForm')?.addEventListener('submit', handleAgendaLoginSubmit);
+
+  document.getElementById('closeAgendaManagerBtn')?.addEventListener('click', closeAgendaManagerModal);
+  document.getElementById('btnAgendaLogout')?.addEventListener('click', handleAgendaLogout);
+
+  document.getElementById('formAddAgendaSlot')?.addEventListener('submit', handleAddAgendaSlotSubmit);
+  document.getElementById('btnResetDefaultSlots')?.addEventListener('click', handleResetDefaultAgendaSlots);
 }
 
-// Configuração do Seletor de Data (com showPicker nativo)
+// Configuração do Seletor de Data
 function setupDatePickerConstraints() {
   const dateInput = document.getElementById('bookingDate');
   if (!dateInput) return;
@@ -711,7 +1015,6 @@ function setupDatePickerConstraints() {
     updateBookingSummary();
   });
 
-  // Abre o calendário nativo ao clicar em qualquer parte do campo de data
   const triggerCalendar = () => {
     try {
       if (typeof dateInput.showPicker === 'function') {
