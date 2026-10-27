@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WALBABER | Barbearia & Agendamento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Topbar Informativo para o Usuário Master -->
+  <aside class="admin-topbar" id="adminTopbar" style="display: none;">
+    <div class="container flex-between">
+      <div class="admin-topbar-info">
+        <span class="admin-badge"><i class="fa-solid fa-crown"></i> MODO MASTER ATIVO</span>
+        <span class="admin-text">Bem-vindo, Administrador! Você tem controle total sobre horários, serviços e agendamentos.</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="btn btn-sm btn-gold-outline" id="btnAdminOpenPanel">
+          <i class="fa-solid fa-sliders"></i> Abrir Painel Master
+        </button>
+        <button class="btn btn-sm btn-danger-outline" id="btnAdminLogout">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair do Master
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Header / Navbar -->
+  <header class="header" id="header">
+    <div class="container navbar">
+      <a href="#home" class="logo">
+        <i class="fa-solid fa-scissors gold-icon"></i>
+        <span>WALBABER <small>BARBEARIA</small></span>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#home" class="nav-link active">Início</a>
+        <a href="#sobre" class="nav-link">Sobre</a>
+        <a href="#servicos" class="nav-link">Serviços</a>
+        <a href="#barbeiros" class="nav-link">Equipe</a>
+        <a href="#depoimentos" class="nav-link">Avaliações</a>
+        <a href="#agendamento" class="nav-link nav-btn-mobile">Agendar Agora</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn-appointments" id="openMyAppointmentsBtn" title="Ver meus agendamentos">
+          <i class="fa-regular fa-calendar-check"></i>
+          <span>Meus Horários</span>
+          <span class="badge" id="appointmentsCount">0</span>
+        </button>
+        <button class="btn-master" id="openMasterBtn" title="Painel Administrativo Master">
+          <i class="fa-solid fa-crown"></i>
+          <span>Master</span>
+        </button>
+        <a href="#agendamento" class="btn btn-primary nav-btn-desktop">
+          <i class="fa-solid fa-calendar-day"></i> Agendar
+        </a>
+        <button class="mobile-toggle" id="menuToggle" aria-label="Abrir Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <div class="hero-badge">
+          <i class="fa-solid fa-crown"></i> Tradição & Estilo Masculino
+        </div>
+        <h1 class="hero-title">
+          Mais que um corte, <br>uma <span>experiência única</span>.
+        </h1>
+        <p class="hero-subtitle">
+          Cortes impecáveis, barba esculpida na navalha com toalha quente e aquele chopp artesanal cortesia. Escolha o seu barbeiro e reserve em poucos segundos.
+        </p>
+        <div class="hero-cta-group">
+          <a href="#agendamento" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-calendar-plus"></i> Agendar Horário Online
+          </a>
+          <a href="#servicos" class="btn btn-outline btn-lg">
+            <i class="fa-solid fa-list-check"></i> Ver Serviços & Preços
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">+8.5k</span>
+            <span class="stat-desc">Clientes Atendidos</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">4.9 <i class="fa-solid fa-star gold-text"></i></span>
+            <span class="stat-desc">+1.200 Avaliações</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">100%</span>
+            <span class="stat-desc">Pontualidade & Conforto</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Highlights Features -->
+    <section class="features-bar">
+      <div class="container features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-fire-burner"></i></div>
+          <div class="feature-text">
+            <h3>Toalha Quente</h3>
+            <p>Tratamento facial clássico e relaxamento completo.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-beer-mug-empty"></i></div>
+          <div class="feature-text">
+            <h3>Chopp Cortesia</h3>
+            <p>Aproveite nossa cerveja artesanal trincando de gelada.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="feature-text">
+            <h3>Sem Filas</h3>
+            <p>Horário reservado exclusivamente para você.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i class="fa-solid fa-gem"></i></div>
+          <div class="feature-text">
+            <h3>Produtos Premium</h3>
+            <p>Pomadas e óleos das melhores marcas do mercado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre Section -->
+    <section class="section about-section" id="sobre">
+      <div class="container about-grid">
+        <div class="about-image-wrapper">
+          <div class="about-img-box">
+            <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80" alt="Barbearia Interior" class="about-img">
+            <div class="about-experience-badge">
+              <span class="exp-years">12</span>
+              <span class="exp-text">Anos de Excelência</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-content">
+          <span class="section-tag">CONHEÇA NOSSA HISTÓRIA</span>
+          <h2 class="section-title">Onde a tradição encontra o <span>estilo contemporâneo</span></h2>
+          <p class="about-description">
+            Fundada em 2014, a <strong>WALBABER</strong> nasceu com a missão de resgatar o ritual do homem clássico, unindo técnicas tradicionais de barbearia com as mais modernas tendências de corte e visagismo.
+          </p>
+          <p class="about-description">
+            Nosso espaço conta com mesa de sinuca, lounge climatizado, Wi-Fi ultra veloz e um bar exclusivo para que cada visita seja muito mais que um cuidado estético: seja o seu momento de descompressão da rotina.
+          </p>
+          <div class="about-list">
+            <div class="about-list-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Consultoria de visagismo personalizada</span>
+            </div>
+            <div class="about-list-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Esterilização hospitalar de ferramentas</span>
+            </div>
+            <div class="about-list-item">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Ambiente climatizado com som ambiente vintage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Serviços Section -->
+    <section class="section services-section" id="servicos">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">CATÁLOGO EXCLUSIVO</span>
+          <h2 class="section-title">Nossos <span>Serviços & Preços</span></h2>
+          <p class="section-desc">Selecione o serviço desejado para adicioná-lo instantaneamente ao agendamento online.</p>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs">
+          <button class="filter-btn active" data-filter="all">Todos</button>
+          <button class="filter-btn" data-filter="cabelo">Cabelo</button>
+          <button class="filter-btn" data-filter="barba">Barba</button>
+          <button class="filter-btn" data-filter="combo">Combos</button>
+          <button class="filter-btn" data-filter="tratamentos">Tratamentos</button>
+        </div>
+
+        <div class="services-grid" id="servicesGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Barbeiros Section -->
+    <section class="section barbers-section" id="barbeiros">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">MESTRES DA NAVALHA</span>
+          <h2 class="section-title">Conheça Nossos <span>Especialistas</span></h2>
+          <p class="section-desc">Profissionais premiados com anos de dedicação à arte do visual masculino.</p>
+        </div>
+
+        <div class="barbers-grid" id="barbersGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Agendamento Section (Core Feature) -->
+    <section class="section booking-section" id="agendamento">
+      <div class="container">
+        <div class="booking-wrapper">
+          <div class="booking-intro">
+            <span class="section-tag">RESERVA FÁCIL & RÁPIDA</span>
+            <h2 class="section-title">Agende seu <span>Horário</span></h2>
+            <p>Escolha o serviço, barbeiro de sua preferência, data e horário ideais. Você receberá a confirmação imediatamente.</p>
+            
+            <div class="booking-steps-indicator">
+              <div class="step-indicator-item active" data-step-target="1">
+                <span class="step-num">1</span>
+                <span class="step-label">Serviço</span>
+              </div>
+              <div class="step-connector"></div>
+              <div class="step-indicator-item" data-step-target="2">
+                <span class="step-num">2</span>
+                <span class="step-label">Barbeiro</span>
+              </div>
+              <div class="step-connector"></div>
+              <div class="step-indicator-item" data-step-target="3">
+                <span class="step-num">3</span>
+                <span class="step-label">Data e Hora</span>
+              </div>
+              <div class="step-connector"></div>
+              <div class="step-indicator-item" data-step-target="4">
+                <span class="step-num">4</span>
+                <span class="step-label">Seus Dados</span>
+              </div>
+            </div>
+
+            <!-- Resumo ao Vivo -->
+            <div class="booking-summary-card">
+              <h3 class="summary-title"><i class="fa-solid fa-receipt"></i> Resumo da Reserva</h3>
+              <div class="summary-line">
+                <span>Serviço:</span>
+                <strong id="summaryService">Nenhum selecionado</strong>
+              </div>
+              <div class="summary-line">
+                <span>Duração estimada:</span>
+                <strong id="summaryDuration">-- min</strong>
+              </div>
+              <div class="summary-line">
+                <span>Barbeiro:</span>
+                <strong id="summaryBarber">Qualquer Barbeiro</strong>
+              </div>
+              <div class="summary-line">
+                <span>Data & Horário:</span>
+                <strong id="summaryDateTime">Não definido</strong>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="summary-total">
+                <span>Valor Total:</span>
+                <span class="total-price" id="summaryTotal">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Area -->
+          <div class="booking-form-area">
+            <form id="bookingForm" novalidate>
+
+              <!-- Step 1: Serviços -->
+              <div class="form-step active" id="step1">
+                <h3 class="step-title">
+                  <i class="fa-solid fa-scissors"></i> 1. Selecione o Serviço
+                </h3>
+                <p class="step-instruction">Você pode escolher um ou mais serviços para o mesmo atendimento:</p>
+                <div class="booking-services-picker" id="bookingServicesPicker">
+                  <!-- Injected by JS -->
+                </div>
+                <div class="step-actions">
+                  <button type="button" class="btn btn-primary" id="btnGoToStep2">
+                    Avançar para Barbeiro <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 2: Barbeiros -->
+              <div class="form-step" id="step2">
+                <h3 class="step-title">
+                  <i class="fa-solid fa-user-tie"></i> 2. Escolha o Profissional
+                </h3>
+                <p class="step-instruction">Selecione seu barbeiro preferido ou deixe com o primeiro disponível:</p>
+                <div class="booking-barbers-picker" id="bookingBarbersPicker">
+                  <!-- Injected by JS -->
+                </div>
+                <div class="step-actions flex-between">
+                  <button type="button" class="btn btn-outline" id="btnBackToStep1">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar
+                  </button>
+                  <button type="button" class="btn btn-primary" id="btnGoToStep3">
+                    Avançar para Data <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 3: Data e Horário -->
+              <div class="form-step" id="step3">
+                <h3 class="step-title">
+                  <i class="fa-solid fa-calendar-days"></i> 3. Escolha a Data e Horário
+                </h3>
+                <div class="date-picker-group">
+                  <label for="bookingDate" class="form-label">Data do Atendimento</label>
+                  <div class="input-with-icon">
+                    <i class="fa-regular fa-calendar input-icon"></i>
+                    <input type="date" id="bookingDate" class="form-control" required>
+                  </div>
+                </div>
+
+                <div class="time-picker-group">
+                  <label class="form-label">Horários Disponíveis</label>
+                  <div class="time-slots-container" id="timeSlotsContainer">
+                    <!-- Injected by JS -->
+                  </div>
+                </div>
+
+                <div class="step-actions flex-between">
+                  <button type="button" class="btn btn-outline" id="btnBackToStep2">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar
+                  </button>
+                  <button type="button" class="btn btn-primary" id="btnGoToStep4">
+                    Avançar para Seus Dados <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Step 4: Dados do Cliente -->
+              <div class="form-step" id="step4">
+                <h3 class="step-title">
+                  <i class="fa-solid fa-address-card"></i> 4. Seus Dados de Contato
+                </h3>
+                <p class="step-instruction">Preencha seus dados para receber o comprovante e aviso no WhatsApp:</p>
+
+                <div class="form-group">
+                  <label for="clientName" class="form-label">Seu Nome Completo *</label>
+                  <div class="input-with-icon">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" id="clientName" class="form-control" placeholder="Ex: Gabriel Silveira" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="clientPhone" class="form-label">WhatsApp com DDD *</label>
+                  <div class="input-with-icon">
+                    <i class="fa-brands fa-whatsapp input-icon"></i>
+                    <input type="tel" id="clientPhone" class="form-control" placeholder="(22) 98765-4321" required>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="clientNotes" class="form-label">Observações (Opcional)</label>
+                  <textarea id="clientNotes" class="form-control" rows="3" placeholder="Ex: Gostaria de alinhar a barba bem quadrada, disfarce navalhado..."></textarea>
+                </div>
+
+                <div class="step-actions flex-between">
+                  <button type="button" class="btn btn-outline" id="btnBackToStep3">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar
+                  </button>
+                  <button type="submit" class="btn btn-primary btn-glow" id="btnConfirmBooking">
+                    <i class="fa-solid fa-check"></i> Finalizar Agendamento
+                  </button>
+                </div>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Depoimentos Section -->
+    <section class="section testimonials-section" id="depoimentos">
+      <div class="container">
+        <div class="section-header text-center">
+          <span class="section-tag">QUEM FREQUENTA APROVA</span>
+          <h2 class="section-title">O que dizem os <span>nossos clientes</span></h2>
+          <p class="section-desc">Mais de 1.200 avaliações 5 estrelas no Google e nas redes sociais.</p>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Melhor barbearia de Rio das Ostras sem dúvidas! O corte degrade do Carlos é cirúrgico e o atendimento com toalha quente e chopp faz toda diferença no dia cansativo."</p>
+            <div class="testimonial-author">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Lucas Martins" class="author-avatar">
+              <div>
+                <h4 class="author-name">Lucas Martins</h4>
+                <span class="author-role">Cliente há 3 anos</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"O sistema de agendamento online é maravilhoso. Chego pontualmente, não pego fila nenhuma e sou atendido na hora. Ambiente sensacional e cerveja sempre gelada."</p>
+            <div class="testimonial-author">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Rodrigo Albuquerque" class="author-avatar">
+              <div>
+                <h4 class="author-name">Rodrigo Albuquerque</h4>
+                <span class="author-role">Empresário</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-stars">
+              <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Fiz o combo 'Dia do Noivo' e foi impecável. Barba desenhada com precisão cirúrgica, hidratação capilar e um atendimento de primeira. Indico de olhos fechados!"</p>
+            <div class="testimonial-author">
+              <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80" alt="Matheus Ramos" class="author-avatar">
+              <div>
+                <h4 class="author-name">Matheus Ramos</h4>
+                <span class="author-role">Advogado</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Localização & Contato -->
+    <section class="section contact-section" id="contato">
+      <div class="container contact-grid">
+        <div class="contact-info">
+          <span class="section-tag">VENHA NOS VISITAR</span>
+          <h2 class="section-title">Onde Estamos & <span>Horários</span></h2>
+          <p class="contact-sub">Espaço moderno com estacionamento conveniado gratuito na porta.</p>
+
+          <div class="contact-items">
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+              <div>
+                <h4>Endereço</h4>
+                <p id="displayStoreAddress">Rua Recife, 1071, Casa 4 - Rio das Ostras - RJ</p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+              <div>
+                <h4>Telefone / WhatsApp</h4>
+                <p><a href="https://wa.me/5522992653627" id="displayStorePhoneLink" target="_blank" style="color: inherit; text-decoration: underline;"><span id="displayStorePhone">(22) 99265-3627</span></a></p>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-regular fa-clock"></i></div>
+              <div>
+                <h4>Horários de Atendimento</h4>
+                <p>Terça a Sexta: 09:00 às 20:00<br>Sábado: 08:30 às 19:00<br>Domingo e Segunda: Fechado</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-map-mockup">
+          <div class="map-container">
+            <iframe 
+              src="https://maps.google.com/maps?q=Rua+Recife,+1071+-+Rio+das+Ostras+-+RJ&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+              width="100%" 
+              height="380" 
+              style="border:0; border-radius: 14px;" 
+              allowfullscreen="" 
+              loading="lazy" 
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-col">
+        <a href="#home" class="logo">
+          <i class="fa-solid fa-scissors gold-icon"></i>
+          <span>WALBABER <small>BARBEARIA</small></span>
+        </a>
+        <p class="footer-desc">
+          Referência em estética e bem-estar masculino. Transformando sua autoestima com precisão, tradição e sofisticação.
+        </p>
+        <div class="footer-socials">
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://wa.me/5522992653627" target="_blank" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Links Rápidos</h4>
+        <ul class="footer-links">
+          <li><a href="#home">Início</a></li>
+          <li><a href="#sobre">Nossa Barbearia</a></li>
+          <li><a href="#servicos">Tabela de Serviços</a></li>
+          <li><a href="#barbeiros">Profissionais</a></li>
+          <li><a href="#agendamento">Agendamento Online</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Serviços Populares</h4>
+        <ul class="footer-links">
+          <li><a href="#agendamento">Corte Degradê & Fade</a></li>
+          <li><a href="#agendamento">Barba Terapia com Toalha</a></li>
+          <li><a href="#agendamento">Combo Cabelo + Barba</a></li>
+          <li><a href="#agendamento">Pigmentação de Barba</a></li>
+          <li><a href="#agendamento">Tratamento Capilar Detox</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container flex-between">
+        <p>&copy; 2026 Barbearia WALBABER. Todos os direitos reservados.</p>
+        <p>Desenvolvido para alta performance no VS Code.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal: Comprovante de Agendamento Concluído -->
+  <div class="modal-backdrop" id="confirmationModal">
+    <div class="modal-card ticket-card">
+      <button class="modal-close" id="closeConfirmationBtn">&times;</button>
+      <div class="ticket-header">
+        <div class="ticket-success-icon"><i class="fa-solid fa-check"></i></div>
+        <h3>Agendamento Confirmado!</h3>
+        <p>Seu horário foi reservado com sucesso no sistema.</p>
+      </div>
+      <div class="ticket-body" id="ticketDetails">
+        <!-- Injected by JS -->
+      </div>
+      <div class="ticket-actions">
+        <a href="#" id="btnShareWhatsApp" target="_blank" class="btn btn-whatsapp">
+          <i class="fa-brands fa-whatsapp"></i> Enviar Mensagem no WhatsApp
+        </a>
+        <button class="btn btn-outline" id="btnFinishTicket">
+          Fechar e Voltar ao Início
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal / Drawer: Meus Agendamentos Salvos -->
+  <div class="modal-backdrop" id="myAppointmentsModal">
+    <div class="modal-card">
+      <button class="modal-close" id="closeMyAppointmentsBtn">&times;</button>
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-calendar-check gold-text"></i> Meus Agendamentos</h3>
+        <p>Horários salvos neste dispositivo via armazenamento local.</p>
+      </div>
+      <div class="modal-body" id="myAppointmentsList">
+        <!-- Injected by JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnCloseMyAppointments">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Login do Usuário Master -->
+  <div class="modal-backdrop" id="masterLoginModal">
+    <div class="modal-card modal-card-sm">
+      <button class="modal-close" id="closeMasterLoginBtn">&times;</button>
+      <div class="modal-header text-center">
+        <div class="master-login-icon">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <h3>Área Exclusiva Master</h3>
+        <p>Acesso restrito ao proprietário da WALBABER para gerenciar serviços, horários e agendamentos.</p>
+      </div>
+      <form id="masterLoginForm" class="modal-form">
+        <div class="form-group">
+          <label for="masterPasswordInput" class="form-label">Senha de Acesso Master</label>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-key input-icon"></i>
+            <input type="password" id="masterPasswordInput" class="form-control" placeholder="Digite sua senha master" required autofocus>
+          </div>
+          <small class="form-tip">Senha padrão inicial: <code class="gold-text">walbaber2026</code></small>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-unlock-keyhole"></i> Entrar como Master
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Painel de Controle Master (Dashboard Completo) -->
+  <div class="modal-backdrop" id="masterDashboardModal">
+    <div class="modal-card modal-card-master">
+      <button class="modal-close" id="closeMasterDashboardBtn">&times;</button>
+      <div class="master-dash-header">
+        <div class="master-dash-title-group">
+          <span class="admin-badge"><i class="fa-solid fa-crown"></i> CENTRAL DO PROPRIETÁRIO</span>
+          <h2>Painel Administrativo Master</h2>
+          <p>Altere horários, adicione ou remova serviços, atualize barbeiros e acompanhe agendamentos de clientes.</p>
+        </div>
+        <button class="btn btn-sm btn-danger-outline" id="btnAdminLogoutFromDash">
+          <i class="fa-solid fa-right-from-bracket"></i> Sair do Modo Master
+        </button>
+      </div>
+
+      <!-- Dashboard Tabs Navigation -->
+      <div class="dash-tabs-nav">
+        <button class="dash-tab-btn active" data-tab="tab-agendamentos">
+          <i class="fa-solid fa-calendar-check"></i> Agendamentos (<span id="dashAppointmentsCount">0</span>)
+        </button>
+        <button class="dash-tab-btn" data-tab="tab-horarios">
+          <i class="fa-solid fa-clock"></i> Horários de Atendimento
+        </button>
+        <button class="dash-tab-btn" data-tab="tab-servicos">
+          <i class="fa-solid fa-scissors"></i> Serviços & Preços
+        </button>
+        <button class="dash-tab-btn" data-tab="tab-barbeiros">
+          <i class="fa-solid fa-user-group"></i> Barbeiros
+        </button>
+        <button class="dash-tab-btn" data-tab="tab-config">
+          <i class="fa-solid fa-gears"></i> Dados da Barbearia & Senha
+        </button>
+      </div>
+
+      <div class="dash-tabs-content">
+        <!-- ABA 1: AGENDAMENTOS GERAIS -->
+        <div class="dash-tab-pane active" id="tab-agendamentos">
+          <div class="dash-metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Total de Agendamentos</span>
+              <strong class="metric-value" id="metricTotalBookings">0</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Faturamento Estimado</span>
+              <strong class="metric-value gold-text" id="metricRevenueTotal">R$ 0,00</strong>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Status Pendente</span>
+              <strong class="metric-value" id="metricPendingCount">0</strong>
+            </div>
+          </div>
+
+          <div class="dash-filters-bar flex-between">
+            <div class="filter-group">
+              <label for="filterBookingStatus" class="form-label-inline">Filtrar por Status:</label>
+              <select id="filterBookingStatus" class="form-select-sm">
+                <option value="all">Todos os Status</option>
+                <option value="Confirmado">Confirmado</option>
+                <option value="Concluído">Concluído</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btnClearFinishedBookings">
+              <i class="fa-solid fa-trash-can"></i> Limpar Cancelados
+            </button>
+          </div>
+
+          <div class="dash-table-container">
+            <div id="masterBookingsTableContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 2: HORÁRIOS DE ATENDIMENTO -->
+        <div class="dash-tab-pane" id="tab-horarios">
+          <div class="dash-card">
+            <h3><i class="fa-solid fa-clock gold-text"></i> Gerenciar Horários de Agendamento</h3>
+            <p class="dash-card-desc">Estes são os horários exibidos no assistente para os clientes escolherem.</p>
+            
+            <form id="formAddSchedule" class="form-inline-add">
+              <input type="time" id="newTimeSlotInput" class="form-control" required style="max-width: 180px;">
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Adicionar Horário
+              </button>
+              <button type="button" class="btn btn-outline" id="btnResetDefaultSlots">
+                <i class="fa-solid fa-rotate-left"></i> Restaurar Horários Padrão
+              </button>
+            </form>
+
+            <div class="current-slots-box">
+              <span class="slots-heading">Horários Ativos no Sistema:</span>
+              <div class="slots-chips-grid" id="masterSlotsChipsContainer">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: SERVIÇOS & PREÇOS -->
+        <div class="dash-tab-pane" id="tab-servicos">
+          <div class="dash-split-layout">
+            <!-- Formulário de Novo Serviço -->
+            <div class="dash-card">
+              <h3><i class="fa-solid fa-plus-circle gold-text"></i> Cadastrar Novo Serviço</h3>
+              <form id="formAddService" class="modal-form">
+                <div class="form-group">
+                  <label class="form-label">Nome do Serviço *</label>
+                  <input type="text" id="newServiceName" class="form-control" placeholder="Ex: Platinado Nevou" required>
+                </div>
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Preço (R$) *</label>
+                    <input type="number" step="0.01" min="0" id="newServicePrice" class="form-control" placeholder="70.00" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Duração (min) *</label>
+                    <input type="number" min="5" step="5" id="newServiceDuration" class="form-control" placeholder="45" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Categoria *</label>
+                  <select id="newServiceCategory" class="form-control" required>
+                    <option value="cabelo">Cabelo</option>
+                    <option value="barba">Barba</option>
+                    <option value="combo">Combo</option>
+                    <option value="tratamentos">Tratamentos</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Descrição Resumida</label>
+                  <textarea id="newServiceDesc" class="form-control" rows="2" placeholder="Descreva os diferenciais deste serviço..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-floppy-disk"></i> Salvar Novo Serviço
+                </button>
+              </form>
+            </div>
+
+            <!-- Lista de Serviços Existentes -->
+            <div class="dash-card">
+              <h3><i class="fa-solid fa-list-check gold-text"></i> Serviços Cadastrados</h3>
+              <div class="master-services-list" id="masterServicesList">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: BARBEIROS -->
+        <div class="dash-tab-pane" id="tab-barbeiros">
+          <div class="dash-split-layout">
+            <!-- Formulário de Novo Barbeiro -->
+            <div class="dash-card">
+              <h3><i class="fa-solid fa-user-plus gold-text"></i> Adicionar Profissional</h3>
+              <form id="formAddBarber" class="modal-form">
+                <div class="form-group">
+                  <label class="form-label">Nome do Barbeiro *</label>
+                  <input type="text" id="newBarberName" class="form-control" placeholder="Ex: Lucas 'Mãos de Tesoura'" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Cargo / Título *</label>
+                  <input type="text" id="newBarberRole" class="form-control" placeholder="Ex: Especialista em Degradê" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Especialidade Principal *</label>
+                  <input type="text" id="newBarberSpecialty" class="form-control" placeholder="Ex: Fade Navalhado & Pigmentação" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Foto / Avatar (URL)</label>
+                  <input type="url" id="newBarberAvatar" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+                  <small class="form-tip">Deixe em branco para usar um avatar padrão masculino.</small>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-user-check"></i> Cadastrar Barbeiro
+                </button>
+              </form>
+            </div>
+
+            <!-- Lista de Barbeiros Atuais -->
+            <div class="dash-card">
+              <h3><i class="fa-solid fa-users gold-text"></i> Equipe WALBABER</h3>
+              <div class="master-barbers-list" id="masterBarbersList">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 5: CONFIGURAÇÕES DA LOJA & SENHA -->
+        <div class="dash-tab-pane" id="tab-config">
+          <div class="dash-card" style="max-width: 650px; margin: 0 auto;">
+            <h3><i class="fa-solid fa-store gold-text"></i> Informações Gerais da WALBABER</h3>
+            <p class="dash-card-desc">Altere o endereço, número de WhatsApp para receber agendamentos ou a senha master.</p>
+
+            <form id="formSaveStoreConfig" class="modal-form">
+              <div class="form-group">
+                <label class="form-label">Nome da Barbearia</label>
+                <input type="text" id="configStoreName" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">WhatsApp para Agendamentos (com DDD, somente números)</label>
+                <input type="text" id="configStoreWhatsApp" class="form-control" placeholder="5522992653627" required>
+                <small class="form-tip">Exemplo: 55 + DDD + Telefone (5522992653627)</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Endereço da Barbearia</label>
+                <input type="text" id="configStoreAddress" class="form-control" required>
+              </div>
+              <div class="summary-divider"></div>
+              <div class="form-group">
+                <label class="form-label">Nova Senha Master (Opcional)</label>
+                <input type="text" id="configMasterPassword" class="form-control" placeholder="Digite uma nova senha para o Master">
+                <small class="form-tip">Deixe em branco se não quiser alterar a senha atual.</small>
+              </div>
+              <div class="modal-actions flex-between" style="margin-top: 25px;">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-floppy-disk"></i> Salvar Configurações
+                </button>
+                <button type="button" class="btn btn-outline" id="btnResetAllDefaults">
+                  <i class="fa-solid fa-triangle-exclamation"></i> Resetar Tudo para o Padrão
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Botão Flutuante do WhatsApp -->
+  <a href="https://wa.me/5522992653627?text=Olá!%20Gostaria%20de%20tirar%20uma%20dúvida%20sobre%20a%20Barbearia%20WALBABER." target="_blank" class="floating-whatsapp" title="Falar no WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
