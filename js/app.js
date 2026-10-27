@@ -613,10 +613,23 @@ function openMyAppointmentsModal() {
       </div>
     `;
   } else {
-    listContainer.innerHTML = appointments.map(item => {
+    const policyNotice = `
+      <div class="cancellation-policy-box">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>
+          <strong>Aviso Importante:</strong> Em caso de desistência ou cancelamento, favor entrar em contato diretamente com o barbeiro com até <strong>3 horas de antecedência</strong>.
+        </div>
+      </div>
+    `;
+
+    const cardsHtml = appointments.map(item => {
       const [year, month, day] = item.date.split('-');
       const formattedDate = `${day}/${month}/${year}`;
       const servicesStr = item.services.map(s => s.name).join(' + ');
+      const clientName = item.client && item.client.name ? item.client.name : 'Cliente';
+      const waNoticeMsg = encodeURIComponent(
+        `Olá! Sou ${clientName}, possuo o agendamento #${item.id} (${formattedDate} às ${item.time}) na Barbearia WALBABER e gostaria de falar sobre meu horário.`
+      );
 
       return `
         <div style="background: var(--bg-dark); border: 1px solid var(--border-light); border-radius: 10px; padding: 16px; margin-bottom: 12px;">
@@ -628,14 +641,19 @@ function openMyAppointmentsModal() {
           <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
             Barbeiro: <strong>${item.barber}</strong> • R$ ${item.totalPrice.toFixed(2).replace('.', ',')}
           </div>
-          <div style="display: flex; justify-content: flex-end; gap: 8px;">
-            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; color: #ff5555; border-color: rgba(255,85,85,0.3);" onclick="clientCancelAppointment('${item.id}')">
-              <i class="fa-solid fa-trash"></i> Cancelar
-            </button>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 10px; margin-top: 10px; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 0.78rem; color: var(--text-dim);">
+              <i class="fa-regular fa-clock gold-text"></i> Desistência? Avise até 3h antes
+            </span>
+            <a href="https://wa.me/${STORE_CONFIG.whatsapp}?text=${waNoticeMsg}" target="_blank" class="btn btn-whatsapp" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none;">
+              <i class="fa-brands fa-whatsapp"></i> Falar com o Barbeiro
+            </a>
           </div>
         </div>
       `;
     }).join('');
+
+    listContainer.innerHTML = policyNotice + cardsHtml;
   }
 
   modal.classList.add('open');
@@ -644,18 +662,6 @@ function openMyAppointmentsModal() {
 function closeMyAppointmentsModal() {
   const modal = document.getElementById('myAppointmentsModal');
   if (modal) modal.classList.remove('open');
-}
-
-function clientCancelAppointment(id) {
-  if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
-    let list = getStoredAppointments();
-    list = list.filter(item => item.id !== id);
-    localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
-    updateAppointmentsCountBadge();
-    openMyAppointmentsModal();
-    if (isAgendaAuth()) renderAgendaManagerBookings();
-    showToast('Agendamento cancelado com sucesso.', 'info');
-  }
 }
 
 // ========================================================

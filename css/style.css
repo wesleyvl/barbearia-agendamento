@@ -1635,6 +1635,28 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   border-color: var(--gold);
 }
 
+.cancellation-policy-box {
+  background: rgba(212, 175, 55, 0.08);
+  border-left: 4px solid var(--gold);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.5;
+}
+
+.cancellation-policy-box i {
+  font-size: 1.25rem;
+  margin-top: 2px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
 .modal-card-sm {
   max-width: 420px;
 }

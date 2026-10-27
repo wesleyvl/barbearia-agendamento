@@ -28,7 +28,7 @@ Os clientes finais acessam o site sem precisar de senha e podem:
 - Selecionar a data com **abertura do calendário nativo com 1 clique**.
 - Escolher apenas os horários que o administrador deixou liberados na agenda.
 - Receber o comprovante (Ticket) e enviar a confirmação pronta pelo WhatsApp.
-- Consultar ou cancelar suas próprias reservas no botão **"Meus Horários"**.
+- Consultar suas reservas no botão **"Meus Horários"** (com aviso para avisar o barbeiro em caso de desistência com até 3 horas de antecedência, sem autoexclusão direta pelo cliente).
 
 ---
 
