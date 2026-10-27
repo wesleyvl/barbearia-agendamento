@@ -1,14 +1,14 @@
 /**
- * WALBABER - SISTEMA DE AGENDAMENTO & CONTROLE MASTER
- * Arquitetura com Separação: Usuário Master vs Usuário Cliente
- * Persistência Total via LocalStorage
+ * WALBABER - SISTEMA DE AGENDAMENTO ONLINE
+ * Focado 100% no Usuário Final (Cliente)
+ * Design Elegante, Agendamento em 4 Passos e Confirmação via WhatsApp
  */
 
 // ========================================================
-// 1. DADOS PADRÃO DE FÁBRICA (DEFAULT)
+// 1. DADOS DOS SERVIÇOS & BARBEIROS DA WALBABER
 // ========================================================
 
-const DEFAULT_SERVICES = [
+const SERVICES_DATA = [
   {
     id: 'corte-classico',
     category: 'cabelo',
@@ -91,7 +91,7 @@ const DEFAULT_SERVICES = [
   }
 ];
 
-const DEFAULT_BARBERS = [
+const BARBERS_DATA = [
   {
     id: 'qualquer',
     name: 'Primeiro Disponível',
@@ -125,134 +125,36 @@ const DEFAULT_BARBERS = [
   }
 ];
 
-const DEFAULT_TIME_SLOTS = [
+const TIME_SLOTS = [
   '09:00', '09:45', '10:30', '11:15', '12:00',
   '13:30', '14:15', '15:00', '15:45', '16:30',
   '17:15', '18:00', '18:45', '19:30'
 ];
 
-const DEFAULT_STORE_CONFIG = {
+// Dados da Barbearia
+const STORE_CONFIG = {
   name: 'WALBABER',
   whatsapp: '5522992653627',
-  address: 'Rua Recife, 1071, Casa 4 - Rio das Ostras - RJ',
-  masterPassword: 'walbaber2026'
+  address: 'Rua Recife, 1071, Casa 4 - Rio das Ostras - RJ'
 };
 
 // ========================================================
-// 2. CAMADA DE DADOS & PERSISTÊNCIA (LOCALSTORAGE)
-// ========================================================
-
-function getServices() {
-  const data = localStorage.getItem('walbaber_services');
-  return data ? JSON.parse(data) : DEFAULT_SERVICES;
-}
-
-function saveServices(services) {
-  localStorage.setItem('walbaber_services', JSON.stringify(services));
-  renderServicesCatalog();
-  renderBookingServices();
-  renderMasterServicesList();
-}
-
-function getBarbers() {
-  const data = localStorage.getItem('walbaber_barbers');
-  return data ? JSON.parse(data) : DEFAULT_BARBERS;
-}
-
-function saveBarbers(barbers) {
-  localStorage.setItem('walbaber_barbers', JSON.stringify(barbers));
-  renderBarbersCatalog();
-  renderBookingBarbers();
-  renderMasterBarbersList();
-}
-
-function getTimeSlots() {
-  const data = localStorage.getItem('walbaber_time_slots');
-  return data ? JSON.parse(data) : DEFAULT_TIME_SLOTS;
-}
-
-function saveTimeSlots(slots) {
-  localStorage.setItem('walbaber_time_slots', JSON.stringify(slots));
-  renderTimeSlots();
-  renderMasterTimeSlots();
-}
-
-function getStoreConfig() {
-  const data = localStorage.getItem('walbaber_store_config');
-  return data ? JSON.parse(data) : DEFAULT_STORE_CONFIG;
-}
-
-function saveStoreConfig(config) {
-  localStorage.setItem('walbaber_store_config', JSON.stringify(config));
-  syncStoreDOM();
-}
-
-function getAllAppointments() {
-  const data = localStorage.getItem('barbearia_agendamentos');
-  return data ? JSON.parse(data) : [];
-}
-
-function saveAllAppointments(list) {
-  localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
-  updateAppointmentsCountBadge();
-  renderMasterBookingsTable();
-}
-
-// Sincroniza informações da loja com o HTML da página
-function syncStoreDOM() {
-  const cfg = getStoreConfig();
-  
-  // Endereço
-  const addressEl = document.getElementById('displayStoreAddress');
-  if (addressEl) addressEl.textContent = cfg.address;
-
-  // Telefone / WhatsApp
-  const phoneEl = document.getElementById('displayStorePhone');
-  if (phoneEl) {
-    const raw = cfg.whatsapp.replace(/\D/g, '');
-    if (raw.length >= 11) {
-      const ddd = raw.slice(-11, -9);
-      const numPart = raw.slice(-9);
-      phoneEl.textContent = `(${ddd}) ${numPart.slice(0, 5)}-${numPart.slice(5)}`;
-    } else {
-      phoneEl.textContent = cfg.whatsapp;
-    }
-  }
-
-  const phoneLink = document.getElementById('displayStorePhoneLink');
-  if (phoneLink) {
-    phoneLink.href = `https://wa.me/${cfg.whatsapp}`;
-  }
-
-  // Botão flutuante WhatsApp
-  const floatingWa = document.querySelector('.floating-whatsapp');
-  if (floatingWa) {
-    floatingWa.href = `https://wa.me/${cfg.whatsapp}?text=Olá!%20Gostaria%20de%20tirar%20uma%20dúvida%20sobre%20a%20Barbearia%20${encodeURIComponent(cfg.name)}.`;
-  }
-}
-
-// ========================================================
-// 3. ESTADO DA SESSÃO E WIZARD CLIENTE
+// 2. ESTADO DO AGENDAMENTO (CLIENTE)
 // ========================================================
 
 const appState = {
   selectedServices: [],
-  selectedBarber: null,
+  selectedBarber: BARBERS_DATA[0],
   selectedDate: '',
   selectedTime: '',
-  currentStep: 1,
-  isMasterAuth: sessionStorage.getItem('walbaber_master_session') === 'true'
+  currentStep: 1
 };
 
 // ========================================================
-// 4. INICIALIZAÇÃO GERAL
+// 3. INICIALIZAÇÃO
 // ========================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-  const barbers = getBarbers();
-  appState.selectedBarber = barbers[0] || null;
-
-  syncStoreDOM();
   renderServicesCatalog('all');
   renderBookingServices();
   renderBarbersCatalog();
@@ -262,22 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDatePickerConstraints();
   updateAppointmentsCountBadge();
   setupPhoneMask();
-
-  checkMasterAuthStatus();
 });
 
 // ========================================================
-// 5. RENDERIZAÇÃO CLIENTE
+// 4. RENDERIZAÇÃO NA PÁGINA
 // ========================================================
 
+// Catálogo de Serviços
 function renderServicesCatalog(filter = 'all') {
   const container = document.getElementById('servicesGrid');
   if (!container) return;
 
-  const services = getServices();
   const filtered = filter === 'all' 
-    ? services 
-    : services.filter(s => s.category === filter);
+    ? SERVICES_DATA 
+    : SERVICES_DATA.filter(s => s.category === filter);
 
   container.innerHTML = filtered.map(service => {
     const isSelected = appState.selectedServices.some(s => s.id === service.id);
@@ -285,13 +185,13 @@ function renderServicesCatalog(filter = 'all') {
       <div class="service-card ${isSelected ? 'selected' : ''}" data-service-id="${service.id}">
         ${service.badge ? `<span class="service-badge">${service.badge}</span>` : ''}
         <div class="service-icon-box">
-          <i class="fa-solid ${service.icon || 'fa-scissors'}"></i>
+          <i class="fa-solid ${service.icon}"></i>
         </div>
         <h3 class="service-title">${service.name}</h3>
-        <p class="service-description">${service.desc || 'Serviço de alta qualidade com os melhores produtos.'}</p>
+        <p class="service-description">${service.desc}</p>
         <div class="service-footer">
           <div class="service-meta">
-            <span class="service-price">R$ ${parseFloat(service.price).toFixed(2).replace('.', ',')}</span>
+            <span class="service-price">R$ ${service.price.toFixed(2).replace('.', ',')}</span>
             <span class="service-duration"><i class="fa-regular fa-clock"></i> ${service.duration} min</span>
           </div>
           <button type="button" class="btn-select-service" onclick="handleQuickSelectService('${service.id}')">
@@ -303,16 +203,17 @@ function renderServicesCatalog(filter = 'all') {
   }).join('');
 }
 
+// Catálogo de Barbeiros
 function renderBarbersCatalog() {
   const container = document.getElementById('barbersGrid');
   if (!container) return;
 
-  const barbers = getBarbers().filter(b => b.id !== 'qualquer');
+  const barbers = BARBERS_DATA.filter(b => b.id !== 'qualquer');
 
   container.innerHTML = barbers.map(barber => `
     <div class="barber-card">
       <div class="barber-img-container">
-        <img src="${barber.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=400&q=80'}" alt="${barber.name}" class="barber-img">
+        <img src="${barber.avatar}" alt="${barber.name}" class="barber-img">
         <span class="barber-specialty-tag">${barber.specialty}</span>
       </div>
       <div class="barber-info">
@@ -320,19 +221,19 @@ function renderBarbersCatalog() {
         <p class="barber-role">${barber.role}</p>
         <div class="barber-rating">
           <i class="fa-solid fa-star"></i>
-          <span>${barber.rating || '5.0 (Especialista)'}</span>
+          <span>${barber.rating}</span>
         </div>
       </div>
     </div>
   `).join('');
 }
 
+// Passo 1: Seleção de Serviços
 function renderBookingServices() {
   const container = document.getElementById('bookingServicesPicker');
   if (!container) return;
 
-  const services = getServices();
-  container.innerHTML = services.map(service => {
+  container.innerHTML = SERVICES_DATA.map(service => {
     const isChecked = appState.selectedServices.some(s => s.id === service.id);
     return `
       <div class="picker-service-item ${isChecked ? 'selected' : ''}" onclick="toggleServiceSelection('${service.id}')">
@@ -343,7 +244,7 @@ function renderBookingServices() {
             <span class="picker-service-duration"><i class="fa-regular fa-clock"></i> ${service.duration} minutos</span>
           </div>
         </div>
-        <span class="picker-service-price">R$ ${parseFloat(service.price).toFixed(2).replace('.', ',')}</span>
+        <span class="picker-service-price">R$ ${service.price.toFixed(2).replace('.', ',')}</span>
       </div>
     `;
   }).join('');
@@ -351,16 +252,16 @@ function renderBookingServices() {
   updateBookingSummary();
 }
 
+// Passo 2: Seleção de Barbeiro
 function renderBookingBarbers() {
   const container = document.getElementById('bookingBarbersPicker');
   if (!container) return;
 
-  const barbers = getBarbers();
-  container.innerHTML = barbers.map(barber => {
+  container.innerHTML = BARBERS_DATA.map(barber => {
     const isSelected = appState.selectedBarber && appState.selectedBarber.id === barber.id;
     return `
       <div class="picker-barber-item ${isSelected ? 'selected' : ''}" onclick="selectBarber('${barber.id}')">
-        <img src="${barber.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80'}" alt="${barber.name}" class="picker-barber-avatar">
+        <img src="${barber.avatar}" alt="${barber.name}" class="picker-barber-avatar">
         <span class="picker-barber-name">${barber.name}</span>
         <span class="picker-barber-role">${barber.role}</span>
       </div>
@@ -368,17 +269,12 @@ function renderBookingBarbers() {
   }).join('');
 }
 
+// Passo 3: Horários Disponíveis
 function renderTimeSlots() {
   const container = document.getElementById('timeSlotsContainer');
   if (!container) return;
 
-  const slots = getTimeSlots();
-  if (slots.length === 0) {
-    container.innerHTML = `<p style="grid-column: 1/-1; color: var(--text-muted); font-size: 0.9rem;">Nenhum horário disponível para esta data.</p>`;
-    return;
-  }
-
-  container.innerHTML = slots.map(time => {
+  container.innerHTML = TIME_SLOTS.map(time => {
     const isSelected = appState.selectedTime === time;
     return `
       <button type="button" class="time-slot-btn ${isSelected ? 'selected' : ''}" onclick="selectTime('${time}')">
@@ -389,7 +285,7 @@ function renderTimeSlots() {
 }
 
 // ========================================================
-// 6. CONTROLE DO FLUXO DO CLIENTE (WIZARD & AGENDAMENTO)
+// 5. NAVEGAÇÃO & SELEÇÕES DO WIZARD
 // ========================================================
 
 function goToStep(stepNumber) {
@@ -427,8 +323,8 @@ function updateBookingSummary() {
 
   if (appState.selectedServices.length > 0) {
     const names = appState.selectedServices.map(s => s.name).join(', ');
-    const totalDuration = appState.selectedServices.reduce((acc, s) => acc + parseInt(s.duration || 0), 0);
-    const totalPrice = appState.selectedServices.reduce((acc, s) => acc + parseFloat(s.price || 0), 0);
+    const totalDuration = appState.selectedServices.reduce((acc, s) => acc + s.duration, 0);
+    const totalPrice = appState.selectedServices.reduce((acc, s) => acc + s.price, 0);
 
     if (summaryService) summaryService.textContent = names;
     if (summaryDuration) summaryDuration.textContent = `${totalDuration} min`;
@@ -457,8 +353,7 @@ function updateBookingSummary() {
 }
 
 function toggleServiceSelection(serviceId) {
-  const services = getServices();
-  const service = services.find(s => s.id === serviceId);
+  const service = SERVICES_DATA.find(s => s.id === serviceId);
   if (!service) return;
 
   const existingIndex = appState.selectedServices.findIndex(s => s.id === serviceId);
@@ -473,8 +368,7 @@ function toggleServiceSelection(serviceId) {
 }
 
 function handleQuickSelectService(serviceId) {
-  const services = getServices();
-  const service = services.find(s => s.id === serviceId);
+  const service = SERVICES_DATA.find(s => s.id === serviceId);
   if (!service) return;
 
   const exists = appState.selectedServices.some(s => s.id === serviceId);
@@ -494,8 +388,7 @@ function handleQuickSelectService(serviceId) {
 }
 
 function selectBarber(barberId) {
-  const barbers = getBarbers();
-  const barber = barbers.find(b => b.id === barberId);
+  const barber = BARBERS_DATA.find(b => b.id === barberId);
   if (barber) {
     appState.selectedBarber = barber;
     renderBookingBarbers();
@@ -509,7 +402,10 @@ function selectTime(time) {
   updateBookingSummary();
 }
 
-// Submissão do Formulário pelo Cliente
+// ========================================================
+// 6. FINALIZAR AGENDAMENTO & TICKET
+// ========================================================
+
 function handleClientFormSubmit(e) {
   e.preventDefault();
 
@@ -538,32 +434,53 @@ function handleClientFormSubmit(e) {
     return;
   }
 
-  const totalPrice = appState.selectedServices.reduce((acc, s) => acc + parseFloat(s.price), 0);
-  const totalDuration = appState.selectedServices.reduce((acc, s) => acc + parseInt(s.duration), 0);
-  const cfg = getStoreConfig();
+  const totalPrice = appState.selectedServices.reduce((acc, s) => acc + s.price, 0);
+  const totalDuration = appState.selectedServices.reduce((acc, s) => acc + s.duration, 0);
 
   const newAppointment = {
     id: 'AGD-' + Date.now().toString().slice(-6),
     createdAt: new Date().toISOString(),
-    status: 'Confirmado',
     client: { name, phone, notes },
     services: appState.selectedServices.map(s => ({ name: s.name, price: s.price })),
-    barber: appState.selectedBarber ? appState.selectedBarber.name : 'Primeiro Disponível',
+    barber: appState.selectedBarber.name,
     date: appState.selectedDate,
     time: appState.selectedTime,
     duration: totalDuration,
     totalPrice: totalPrice
   };
 
-  const currentList = getAllAppointments();
-  currentList.unshift(newAppointment);
-  saveAllAppointments(currentList);
+  // Salva no armazenamento local do dispositivo
+  saveAppointmentToLocalStorage(newAppointment);
 
-  showTicketModal(newAppointment, cfg);
+  // Exibe o Comprovante (Ticket)
+  showTicketModal(newAppointment);
+
+  // Reseta formulário
   resetBookingForm();
 }
 
-function showTicketModal(appointment, cfg) {
+function saveAppointmentToLocalStorage(appointment) {
+  const list = getStoredAppointments();
+  list.unshift(appointment);
+  localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
+  updateAppointmentsCountBadge();
+}
+
+function getStoredAppointments() {
+  const data = localStorage.getItem('barbearia_agendamentos');
+  return data ? JSON.parse(data) : [];
+}
+
+function updateAppointmentsCountBadge() {
+  const countBadge = document.getElementById('appointmentsCount');
+  if (countBadge) {
+    const list = getStoredAppointments();
+    countBadge.textContent = list.length;
+    countBadge.style.display = list.length > 0 ? 'inline-block' : 'none';
+  }
+}
+
+function showTicketModal(appointment) {
   const modal = document.getElementById('confirmationModal');
   const detailsContainer = document.getElementById('ticketDetails');
   const btnShareWhatsApp = document.getElementById('btnShareWhatsApp');
@@ -611,7 +528,7 @@ function showTicketModal(appointment, cfg) {
 
   if (btnShareWhatsApp) {
     const message = encodeURIComponent(
-      `💈 *NOVO AGENDAMENTO - ${cfg.name}*\n\n` +
+      `💈 *NOVO AGENDAMENTO - ${STORE_CONFIG.name}*\n\n` +
       `👤 *Cliente:* ${appointment.client.name}\n` +
       `✂️ *Serviço(s):* ${servicesListStr}\n` +
       `💈 *Barbeiro:* ${appointment.barber}\n` +
@@ -620,7 +537,7 @@ function showTicketModal(appointment, cfg) {
       `🔖 *Código:* #${appointment.id}\n\n` +
       `Por favor, confirmem meu horário!`
     );
-    btnShareWhatsApp.href = `https://wa.me/${cfg.whatsapp}?text=${message}`;
+    btnShareWhatsApp.href = `https://wa.me/${STORE_CONFIG.whatsapp}?text=${message}`;
   }
 
   modal.classList.add('open');
@@ -633,8 +550,7 @@ function closeConfirmationModal() {
 
 function resetBookingForm() {
   appState.selectedServices = [];
-  const barbers = getBarbers();
-  appState.selectedBarber = barbers[0] || null;
+  appState.selectedBarber = BARBERS_DATA[0];
   appState.selectedTime = '';
   
   const clientName = document.getElementById('clientName');
@@ -651,26 +567,13 @@ function resetBookingForm() {
   renderTimeSlots();
 }
 
-function updateAppointmentsCountBadge() {
-  const countBadge = document.getElementById('appointmentsCount');
-  const dashCount = document.getElementById('dashAppointmentsCount');
-  const list = getAllAppointments();
-
-  if (countBadge) {
-    countBadge.textContent = list.length;
-    countBadge.style.display = list.length > 0 ? 'inline-block' : 'none';
-  }
-  if (dashCount) {
-    dashCount.textContent = list.length;
-  }
-}
-
+// "Meus Agendamentos" para o Cliente
 function openMyAppointmentsModal() {
   const modal = document.getElementById('myAppointmentsModal');
   const listContainer = document.getElementById('myAppointmentsList');
   if (!modal || !listContainer) return;
 
-  const appointments = getAllAppointments();
+  const appointments = getStoredAppointments();
 
   if (appointments.length === 0) {
     listContainer.innerHTML = `
@@ -689,15 +592,15 @@ function openMyAppointmentsModal() {
         <div style="background: var(--bg-dark); border: 1px solid var(--border-light); border-radius: 10px; padding: 16px; margin-bottom: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <strong style="color: var(--gold);">#${item.id}</strong>
-            <span class="badge-status ${item.status ? item.status.toLowerCase() : 'confirmado'}">${item.status || 'Confirmado'}</span>
+            <span style="font-size: 0.82rem; color: var(--text-dim);">${formattedDate} às ${item.time}</span>
           </div>
           <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 4px;">${servicesStr}</div>
           <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">
-            Barbeiro: <strong>${item.barber}</strong> • ${formattedDate} às ${item.time} • <strong>R$ ${item.totalPrice.toFixed(2).replace('.', ',')}</strong>
+            Barbeiro: <strong>${item.barber}</strong> • R$ ${item.totalPrice.toFixed(2).replace('.', ',')}
           </div>
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
             <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.78rem; color: #ff5555; border-color: rgba(255,85,85,0.3);" onclick="clientCancelAppointment('${item.id}')">
-              <i class="fa-solid fa-trash"></i> Cancelar Agendamento
+              <i class="fa-solid fa-trash"></i> Cancelar
             </button>
           </div>
         </div>
@@ -708,497 +611,24 @@ function openMyAppointmentsModal() {
   modal.classList.add('open');
 }
 
+function closeMyAppointmentsModal() {
+  const modal = document.getElementById('myAppointmentsModal');
+  if (modal) modal.classList.remove('open');
+}
+
 function clientCancelAppointment(id) {
-  if (confirm('Tem certeza que deseja cancelar o agendamento?')) {
-    let list = getAllAppointments();
-    list = list.map(item => {
-      if (item.id === id) {
-        return { ...item, status: 'Cancelado' };
-      }
-      return item;
-    });
-    saveAllAppointments(list);
-    openMyAppointmentsModal();
-    showToast('Agendamento marcado como Cancelado.', 'info');
-  }
-}
-
-// ========================================================
-// 7. FUNCIONALIDADES DO USUÁRIO MASTER (ADMINISTRADOR)
-// ========================================================
-
-function checkMasterAuthStatus() {
-  const topbar = document.getElementById('adminTopbar');
-  if (appState.isMasterAuth) {
-    if (topbar) topbar.style.display = 'block';
-  } else {
-    if (topbar) topbar.style.display = 'none';
-  }
-}
-
-function openMasterLoginModal() {
-  if (appState.isMasterAuth) {
-    openMasterDashboard();
-    return;
-  }
-  const modal = document.getElementById('masterLoginModal');
-  const passInput = document.getElementById('masterPasswordInput');
-  if (passInput) passInput.value = '';
-  if (modal) modal.classList.add('open');
-}
-
-function closeMasterLoginModal() {
-  const modal = document.getElementById('masterLoginModal');
-  if (modal) modal.classList.remove('open');
-}
-
-function handleMasterLogin(e) {
-  e.preventDefault();
-  const passInput = document.getElementById('masterPasswordInput');
-  const enteredPass = passInput ? passInput.value.trim() : '';
-  const currentConfig = getStoreConfig();
-
-  if (enteredPass === currentConfig.masterPassword) {
-    appState.isMasterAuth = true;
-    sessionStorage.setItem('walbaber_master_session', 'true');
-    closeMasterLoginModal();
-    checkMasterAuthStatus();
-    openMasterDashboard();
-    showToast('Acesso Master autenticado com sucesso! Bem-vindo.');
-  } else {
-    showToast('Senha master incorreta! Tente novamente.', 'error');
-  }
-}
-
-function handleMasterLogout() {
-  appState.isMasterAuth = false;
-  sessionStorage.removeItem('walbaber_master_session');
-  checkMasterAuthStatus();
-  closeMasterDashboard();
-  showToast('Você saiu do Modo Master.', 'info');
-}
-
-function openMasterDashboard() {
-  const modal = document.getElementById('masterDashboardModal');
-  if (!modal) return;
-
-  renderMasterBookingsTable();
-  renderMasterTimeSlots();
-  renderMasterServicesList();
-  renderMasterBarbersList();
-  populateMasterConfigForm();
-
-  modal.classList.add('open');
-}
-
-function closeMasterDashboard() {
-  const modal = document.getElementById('masterDashboardModal');
-  if (modal) modal.classList.remove('open');
-}
-
-// ========================================================
-// 8. TABS & GESTÃO MASTER (CRUD DE HORÁRIOS, SERVIÇOS, ETC.)
-// ========================================================
-
-// TAB 1: Agendamentos Gerais
-function renderMasterBookingsTable() {
-  const container = document.getElementById('masterBookingsTableContainer');
-  const filterSelect = document.getElementById('filterBookingStatus');
-  const selectedFilter = filterSelect ? filterSelect.value : 'all';
-  
-  if (!container) return;
-
-  let appointments = getAllAppointments();
-
-  const totalCount = appointments.length;
-  const pendingCount = appointments.filter(a => a.status === 'Pendente').length;
-  const totalRevenue = appointments
-    .filter(a => a.status !== 'Cancelado')
-    .reduce((sum, a) => sum + parseFloat(a.totalPrice || 0), 0);
-
-  const elTotal = document.getElementById('metricTotalBookings');
-  const elPending = document.getElementById('metricPendingCount');
-  const elRev = document.getElementById('metricRevenueTotal');
-
-  if (elTotal) elTotal.textContent = totalCount;
-  if (elPending) elPending.textContent = pendingCount;
-  if (elRev) elRev.textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
-
-  if (selectedFilter !== 'all') {
-    appointments = appointments.filter(a => a.status === selectedFilter);
-  }
-
-  if (appointments.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-        <i class="fa-solid fa-calendar-xmark" style="font-size: 2.5rem; margin-bottom: 12px; color: var(--gold);"></i>
-        <p>Nenhum agendamento encontrado para este filtro.</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = `
-    <table class="dash-table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Cliente / Contato</th>
-          <th>Serviço(s)</th>
-          <th>Barbeiro</th>
-          <th>Data / Horário</th>
-          <th>Valor</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${appointments.map(item => {
-          const [year, month, day] = item.date.split('-');
-          const formattedDate = `${day}/${month}/${year}`;
-          const cleanPhone = item.client.phone.replace(/\D/g, '');
-          const servicesText = item.services.map(s => s.name).join(', ');
-          const waMessage = encodeURIComponent(
-            `Olá ${item.client.name}! Sou da Barbearia WALBABER referente ao seu agendamento (#${item.id}) no dia ${formattedDate} às ${item.time}. Tudo confirmado!`
-          );
-
-          return `
-            <tr>
-              <td><strong class="gold-text">#${item.id}</strong></td>
-              <td>
-                <strong>${item.client.name}</strong><br>
-                <small style="color: var(--text-muted);">${item.client.phone}</small>
-              </td>
-              <td>
-                <span>${servicesText}</span><br>
-                <small style="color: var(--text-dim);">${item.duration} min</small>
-              </td>
-              <td><strong>${item.barber}</strong></td>
-              <td><strong>${formattedDate}</strong><br><small class="gold-text">${item.time}</small></td>
-              <td><strong>R$ ${item.totalPrice.toFixed(2).replace('.', ',')}</strong></td>
-              <td>
-                <select class="form-select-sm" onchange="masterUpdateBookingStatus('${item.id}', this.value)">
-                  <option value="Confirmado" ${item.status === 'Confirmado' ? 'selected' : ''}>Confirmado</option>
-                  <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                  <option value="Concluído" ${item.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
-                  <option value="Cancelado" ${item.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
-                </select>
-              </td>
-              <td>
-                <div class="table-actions">
-                  <a href="https://wa.me/55${cleanPhone}?text=${waMessage}" target="_blank" class="btn-icon-wa" title="Chamar no WhatsApp">
-                    <i class="fa-brands fa-whatsapp"></i>
-                  </a>
-                  <button type="button" class="btn-icon-del" onclick="masterDeleteBooking('${item.id}')" title="Excluir Agendamento">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-function masterUpdateBookingStatus(id, newStatus) {
-  let list = getAllAppointments();
-  list = list.map(item => {
-    if (item.id === id) {
-      return { ...item, status: newStatus };
-    }
-    return item;
-  });
-  saveAllAppointments(list);
-  showToast(`Status do agendamento #${id} atualizado para ${newStatus}!`);
-}
-
-function masterDeleteBooking(id) {
-  if (confirm(`Deseja excluir permanentemente o agendamento #${id}?`)) {
-    let list = getAllAppointments();
+  if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+    let list = getStoredAppointments();
     list = list.filter(item => item.id !== id);
-    saveAllAppointments(list);
-    showToast(`Agendamento #${id} removido.`, 'info');
-  }
-}
-
-function masterClearCancelledBookings() {
-  let list = getAllAppointments();
-  const countBefore = list.length;
-  list = list.filter(item => item.status !== 'Cancelado');
-  
-  if (list.length === countBefore) {
-    showToast('Não há agendamentos cancelados para remover.', 'info');
-    return;
-  }
-
-  saveAllAppointments(list);
-  showToast('Todos os agendamentos cancelados foram removidos!');
-}
-
-// TAB 2: Horários
-function renderMasterTimeSlots() {
-  const container = document.getElementById('masterSlotsChipsContainer');
-  if (!container) return;
-
-  const slots = getTimeSlots();
-  container.innerHTML = slots.map(time => `
-    <div class="master-slot-chip">
-      <i class="fa-regular fa-clock gold-text"></i>
-      <strong>${time}</strong>
-      <button type="button" class="chip-del-btn" onclick="masterRemoveTimeSlot('${time}')" title="Remover horário">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-  `).join('');
-}
-
-function masterAddTimeSlot(time) {
-  if (!time) return;
-  let slots = getTimeSlots();
-
-  if (slots.includes(time)) {
-    showToast('Este horário já está cadastrado!', 'warning');
-    return;
-  }
-
-  slots.push(time);
-  slots.sort((a, b) => a.localeCompare(b));
-  saveTimeSlots(slots);
-  showToast(`Novo horário ${time} adicionado!`);
-}
-
-function masterRemoveTimeSlot(time) {
-  let slots = getTimeSlots();
-  slots = slots.filter(t => t !== time);
-  saveTimeSlots(slots);
-  showToast(`Horário ${time} removido.`, 'info');
-}
-
-function masterResetDefaultSlots() {
-  if (confirm('Restaurar a grade de horários padrão?')) {
-    saveTimeSlots([...DEFAULT_TIME_SLOTS]);
-    showToast('Horários restaurados para o padrão.');
-  }
-}
-
-// TAB 3: Serviços
-function renderMasterServicesList() {
-  const container = document.getElementById('masterServicesList');
-  if (!container) return;
-
-  const services = getServices();
-  container.innerHTML = services.map(service => `
-    <div class="master-item-row">
-      <div style="flex-grow: 1;">
-        <span class="master-item-title">${service.name}</span>
-        <span class="master-item-subtitle">${service.category.toUpperCase()} • ${service.duration} min</span>
-      </div>
-      <div class="master-item-price-edit">
-        <span style="font-size: 0.82rem; color: var(--text-muted);">R$</span>
-        <input type="number" step="0.5" class="master-price-input" value="${service.price}" onchange="masterUpdateServicePrice('${service.id}', this.value)" title="Edite o preço e saia do campo">
-      </div>
-      <button type="button" class="btn-icon-del" onclick="masterDeleteService('${service.id}')" title="Excluir Serviço">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    </div>
-  `).join('');
-}
-
-function masterUpdateServicePrice(id, newPrice) {
-  const priceVal = parseFloat(newPrice);
-  if (isNaN(priceVal) || priceVal < 0) {
-    showToast('Valor de preço inválido!', 'error');
-    renderMasterServicesList();
-    return;
-  }
-
-  let services = getServices();
-  services = services.map(s => {
-    if (s.id === id) {
-      return { ...s, price: priceVal };
-    }
-    return s;
-  });
-
-  saveServices(services);
-  showToast('Preço do serviço atualizado com sucesso!');
-}
-
-function masterDeleteService(id) {
-  let services = getServices();
-  if (services.length <= 1) {
-    showToast('Você deve manter pelo menos um serviço cadastrado!', 'warning');
-    return;
-  }
-
-  if (confirm('Tem certeza que deseja excluir este serviço?')) {
-    services = services.filter(s => s.id !== id);
-    saveServices(services);
-    showToast('Serviço removido com sucesso.', 'info');
-  }
-}
-
-function handleAddServiceSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('newServiceName').value.trim();
-  const price = parseFloat(document.getElementById('newServicePrice').value);
-  const duration = parseInt(document.getElementById('newServiceDuration').value, 10);
-  const category = document.getElementById('newServiceCategory').value;
-  const desc = document.getElementById('newServiceDesc').value.trim();
-
-  if (!name || isNaN(price) || isNaN(duration)) {
-    showToast('Preencha os campos obrigatórios corretamente!', 'error');
-    return;
-  }
-
-  const id = 'serv-' + Date.now().toString().slice(-5);
-  const newService = {
-    id,
-    name,
-    price,
-    duration,
-    category,
-    desc,
-    icon: category === 'barba' ? 'fa-user-ninja' : 'fa-scissors',
-    badge: 'Novo'
-  };
-
-  const services = getServices();
-  services.unshift(newService);
-  saveServices(services);
-
-  e.target.reset();
-  showToast(`Serviço "${name}" cadastrado com sucesso!`);
-}
-
-// TAB 4: Barbeiros
-function renderMasterBarbersList() {
-  const container = document.getElementById('masterBarbersList');
-  if (!container) return;
-
-  const barbers = getBarbers();
-  container.innerHTML = barbers.map(barber => `
-    <div class="master-item-row">
-      <img src="${barber.avatar || 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80'}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
-      <div style="flex-grow: 1;">
-        <span class="master-item-title">${barber.name}</span>
-        <span class="master-item-subtitle">${barber.role} • ${barber.specialty}</span>
-      </div>
-      ${barber.id !== 'qualquer' ? `
-        <button type="button" class="btn-icon-del" onclick="masterDeleteBarber('${barber.id}')" title="Excluir Barbeiro">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      ` : '<span style="font-size: 0.75rem; color: var(--gold);">Padrão</span>'}
-    </div>
-  `).join('');
-}
-
-function masterDeleteBarber(id) {
-  let barbers = getBarbers();
-  if (confirm('Tem certeza que deseja remover este barbeiro?')) {
-    barbers = barbers.filter(b => b.id !== id);
-    saveBarbers(barbers);
-    showToast('Barbeiro removido com sucesso.', 'info');
-  }
-}
-
-function handleAddBarberSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('newBarberName').value.trim();
-  const role = document.getElementById('newBarberRole').value.trim();
-  const specialty = document.getElementById('newBarberSpecialty').value.trim();
-  let avatar = document.getElementById('newBarberAvatar').value.trim();
-
-  if (!avatar) {
-    avatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-  }
-
-  const id = 'barber-' + Date.now().toString().slice(-5);
-  const newBarber = {
-    id,
-    name,
-    role,
-    specialty,
-    avatar,
-    rating: '5.0 (Novo)'
-  };
-
-  const barbers = getBarbers();
-  barbers.push(newBarber);
-  saveBarbers(barbers);
-
-  e.target.reset();
-  showToast(`Barbeiro ${name} adicionado à equipe!`);
-}
-
-// TAB 5: Configurações Gerais
-function populateMasterConfigForm() {
-  const cfg = getStoreConfig();
-  const nameInput = document.getElementById('configStoreName');
-  const waInput = document.getElementById('configStoreWhatsApp');
-  const addrInput = document.getElementById('configStoreAddress');
-  const passInput = document.getElementById('configMasterPassword');
-
-  if (nameInput) nameInput.value = cfg.name;
-  if (waInput) waInput.value = cfg.whatsapp;
-  if (addrInput) addrInput.value = cfg.address;
-  if (passInput) passInput.value = '';
-}
-
-function handleSaveStoreConfig(e) {
-  e.preventDefault();
-  const cfg = getStoreConfig();
-
-  const name = document.getElementById('configStoreName').value.trim();
-  const whatsapp = document.getElementById('configStoreWhatsApp').value.replace(/\D/g, '');
-  const address = document.getElementById('configStoreAddress').value.trim();
-  const newPass = document.getElementById('configMasterPassword').value.trim();
-
-  if (!name || !whatsapp || !address) {
-    showToast('Preencha todos os campos obrigatórios!', 'error');
-    return;
-  }
-
-  cfg.name = name;
-  cfg.whatsapp = whatsapp;
-  cfg.address = address;
-  if (newPass.length >= 4) {
-    cfg.masterPassword = newPass;
-    showToast('Senha master atualizada!');
-  }
-
-  saveStoreConfig(cfg);
-  showToast('Configurações da barbearia salvas com sucesso!');
-}
-
-function handleResetAllDefaults() {
-  if (confirm('ATENÇÃO: Deseja resetar todos os horários, serviços, barbeiros e dados para o padrão de fábrica?')) {
-    localStorage.removeItem('walbaber_services');
-    localStorage.removeItem('walbaber_barbers');
-    localStorage.removeItem('walbaber_time_slots');
-    localStorage.removeItem('walbaber_store_config');
-    
-    syncStoreDOM();
-    renderServicesCatalog();
-    renderBookingServices();
-    renderBarbersCatalog();
-    renderBookingBarbers();
-    renderTimeSlots();
-
-    renderMasterBookingsTable();
-    renderMasterTimeSlots();
-    renderMasterServicesList();
-    renderMasterBarbersList();
-    populateMasterConfigForm();
-
-    showToast('Todos os dados foram resetados para os padrões!');
+    localStorage.setItem('barbearia_agendamentos', JSON.stringify(list));
+    updateAppointmentsCountBadge();
+    openMyAppointmentsModal();
+    showToast('Agendamento cancelado com sucesso.', 'info');
   }
 }
 
 // ========================================================
-// 9. EVENT LISTENERS E CONTROLES DE INTERFACE
+// 7. EVENT LISTENERS E CONTROLES
 // ========================================================
 
 function setupEventListeners() {
@@ -1260,49 +690,9 @@ function setupEventListeners() {
   document.getElementById('openMyAppointmentsBtn')?.addEventListener('click', openMyAppointmentsModal);
   document.getElementById('closeMyAppointmentsBtn')?.addEventListener('click', closeMyAppointmentsModal);
   document.getElementById('btnCloseMyAppointments')?.addEventListener('click', closeMyAppointmentsModal);
-
-  // ÁREA MASTER: Login & Dashboard
-  document.getElementById('openMasterBtn')?.addEventListener('click', openMasterLoginModal);
-  document.getElementById('btnAdminOpenPanel')?.addEventListener('click', openMasterDashboard);
-  document.getElementById('closeMasterLoginBtn')?.addEventListener('click', closeMasterLoginModal);
-  document.getElementById('closeMasterDashboardBtn')?.addEventListener('click', closeMasterDashboard);
-
-  document.getElementById('masterLoginForm')?.addEventListener('submit', handleMasterLogin);
-  document.getElementById('btnAdminLogout')?.addEventListener('click', handleMasterLogout);
-  document.getElementById('btnAdminLogoutFromDash')?.addEventListener('click', handleMasterLogout);
-
-  document.querySelectorAll('.dash-tab-btn').forEach(tabBtn => {
-    tabBtn.addEventListener('click', (e) => {
-      document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.dash-tab-pane').forEach(p => p.classList.remove('active'));
-
-      const targetBtn = e.currentTarget;
-      targetBtn.classList.add('active');
-      const targetPaneId = targetBtn.getAttribute('data-tab');
-      const targetPane = document.getElementById(targetPaneId);
-      if (targetPane) targetPane.classList.add('active');
-    });
-  });
-
-  document.getElementById('filterBookingStatus')?.addEventListener('change', renderMasterBookingsTable);
-  document.getElementById('btnClearFinishedBookings')?.addEventListener('click', masterClearCancelledBookings);
-
-  document.getElementById('formAddSchedule')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const input = document.getElementById('newTimeSlotInput');
-    if (input && input.value) {
-      masterAddTimeSlot(input.value);
-      input.value = '';
-    }
-  });
-  document.getElementById('btnResetDefaultSlots')?.addEventListener('click', masterResetDefaultSlots);
-
-  document.getElementById('formAddService')?.addEventListener('submit', handleAddServiceSubmit);
-  document.getElementById('formAddBarber')?.addEventListener('submit', handleAddBarberSubmit);
-  document.getElementById('formSaveStoreConfig')?.addEventListener('submit', handleSaveStoreConfig);
-  document.getElementById('btnResetAllDefaults')?.addEventListener('click', handleResetAllDefaults);
 }
 
+// Configuração do Seletor de Data (com showPicker nativo)
 function setupDatePickerConstraints() {
   const dateInput = document.getElementById('bookingDate');
   if (!dateInput) return;
@@ -1321,20 +711,17 @@ function setupDatePickerConstraints() {
     updateBookingSummary();
   });
 
-  // Abre o calendário nativo ao clicar em qualquer parte do campo
+  // Abre o calendário nativo ao clicar em qualquer parte do campo de data
   const triggerCalendar = () => {
     try {
       if (typeof dateInput.showPicker === 'function') {
         dateInput.showPicker();
       }
-    } catch (err) {
-      // Fallback para navegadores legados
-    }
+    } catch (err) {}
   };
 
   dateInput.addEventListener('click', triggerCalendar);
 
-  // Permite clicar também no rótulo do campo para abrir o calendário
   const dateWrapper = dateInput.closest('.date-picker-group');
   if (dateWrapper) {
     const label = dateWrapper.querySelector('label');
@@ -1348,6 +735,7 @@ function setupDatePickerConstraints() {
   }
 }
 
+// Máscara para WhatsApp
 function setupPhoneMask() {
   const phoneInput = document.getElementById('clientPhone');
   if (!phoneInput) return;
@@ -1366,6 +754,7 @@ function setupPhoneMask() {
   });
 }
 
+// Toasts de Notificação
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
